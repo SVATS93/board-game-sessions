@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Playhouse Social</title>
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    body {
+      background: var(--black);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--sp-6);
+      position: relative;
+      overflow: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: -20%;
+      right: -10%;
+      width: 50%;
+      height: 50%;
+      background: radial-gradient(ellipse, rgba(245,166,35,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .admin-wrap {
+      width: 100%;
+      max-width: 400px;
+      animation: fadeUp 0.5s var(--ease) both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .admin-logo {
+      text-align: center;
+      margin-bottom: var(--sp-8);
+    }
+    .admin-wordmark {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      letter-spacing: 0.06em;
+      color: var(--amber);
+      text-shadow: 0 0 30px rgba(245,166,35,0.35);
+      line-height: 1;
+    }
+    .admin-sub {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-top: var(--sp-1);
+    }
+    .admin-card {
+      background: var(--surface);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--r-xl);
+      padding: var(--sp-8);
+      box-shadow: 0 0 60px rgba(245,166,35,0.06);
+    }
+    .admin-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber);
+      text-align: center;
+      margin-bottom: var(--sp-6);
+    }
+    .forgot { text-align: center; font-size: 13px; color: var(--cyan); cursor: pointer; margin-top: var(--sp-3); }
+    .forgot:hover { text-decoration: underline; }
+    .back-link { display: block; text-align: center; font-size: 13px; color: var(--text-muted); margin-top: var(--sp-5); cursor: pointer; }
+    .back-link:hover { color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+<div class="admin-wrap">
+  <div class="admin-logo">
+    <div class="admin-wordmark">PLAYHOUSE<br>SOCIAL</div>
+    <div class="admin-sub">Admin Portal</div>
+  </div>
+
+  <div class="admin-card">
+    <div class="admin-title">God Mode Access</div>
+    <form onsubmit="adminLogin(event)" style="display:flex;flex-direction:column;gap:var(--sp-5)">
+      <div class="form-group">
+        <label class="form-label">Login ID</label>
+        <input type="text" class="form-input" id="admin-id" placeholder="admin@playhousesocial.in" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="admin-pwd" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-amber w-full" style="padding:var(--sp-4);font-size:15px">Login</button>
+    </form>
+    <div class="forgot" onclick="alert('Password reset — Firebase Phase 2')">Forgot password?</div>
+  </div>
+
+  <a href="../index.html" class="back-link">← Back to player login</a>
+</div>
+
+<script>
+function adminLogin(e) {
+  e.preventDefault();
+  // Phase 2: Firebase Auth with admin role check
+  window.location.href = 'god-mode.html';
+}
+</script>
+</body>
+</html>

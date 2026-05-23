@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Library — Playhouse Social</title>
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    .weight-pip { display:inline-flex; gap:2px; }
+    .pip { width:7px;height:7px;border-radius:50%; }
+    .pip.filled { background:var(--cyan); }
+    .pip.empty  { background:var(--surface-3); border:1px solid var(--border); }
+    .status-avail  { color:var(--status-green); font-weight:600; font-size:12px; }
+    .status-booked { color:var(--amber); font-weight:600; font-size:12px; }
+    .brief-text { font-size:13px; color:var(--text-secondary); max-width:220px; line-height:1.5; }
+  </style>
+</head>
+<body>
+<div class="app-shell" id="shell"></div>
+
+<script>
+const LIBRARY = [
+  { name:'Scythe (Base)', year:2016, publisher:'Stonemaier Games', brief:'Five factions vie for dominance in war-torn dieselpunk 1920s Europe.', overallRank:26, category:'Strategy', catRank:27, players:'1–5', time:115, age:'14+', weight:3.45, status:'available' },
+  { name:'Ark Nova', year:2021, publisher:'Capstone Games', brief:'Fund conservation projects, manage animals and build the best zoo.', overallRank:2, category:'Strategy', catRank:2, players:'1–4', time:150, age:'14+', weight:3.8, status:'booked' },
+  { name:'Jaipur', year:2009, publisher:'Asmodee', brief:'Fast-paced trading card duel set in a vibrant Indian spice market.', overallRank:194, category:'Card Game', catRank:12, players:'2', time:30, age:'10+', weight:1.49, status:'available' },
+  { name:'Wyrmspan', year:2024, publisher:'Stonemaier Games', brief:'Build a cave sanctuary for dragons in this engine-building game.', overallRank:123, category:'Engine Build', catRank:14, players:'1–5', time:90, age:'14+', weight:2.83, status:'available' },
+  { name:'Catan', year:1995, publisher:'Catan Studio', brief:'Classic resource trading and settlement building on a modular island.', overallRank:312, category:'Family', catRank:8, players:'3–4', time:90, age:'10+', weight:2.33, status:'available' },
+];
+
+function weightPips(w) {
+  const filled = Math.round(w);
+  return `<div class="weight-pip">${[1,2,3,4,5].map(i =>
+    `<div class="pip ${i<=filled?'filled':'empty'}"></div>`
+  ).join('')}</div>`;
+}
+</script>
+
+<script src="../js/app.js"></script>
+<script src="../js/shell.js"></script>
+<script>
+document.getElementById('shell').innerHTML = buildShell('library') + `
+  <div class="page-body">
+    <h1 class="page-title">Game Library</h1>
+    <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-lg);overflow:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Game name</th>
+            <th>Publisher</th>
+            <th>Year</th>
+            <th>About</th>
+            <th colspan="2">BGG ranking</th>
+            <th>Players</th>
+            <th>Time</th>
+            <th>Age</th>
+            <th>Weight</th>
+            <th>Status</th>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th></th><th></th><th></th><th></th>
+            <th style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Overall</th>
+            <th style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Category</th>
+            <th></th><th></th><th></th><th></th><th></th>
+          </tr>
+        </thead>
+        <tbody id="library-body"></tbody>
+      </table>
+    </div>
+  </div>
+` + closeShell();
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('library-body').innerHTML = LIBRARY.map(g => `
+    <tr>
+      <td style="font-weight:600;white-space:nowrap">${g.name}</td>
+      <td style="color:var(--text-secondary);font-size:13px">${g.publisher}</td>
+      <td style="color:var(--text-muted)">${g.year}</td>
+      <td><div class="brief-text">${g.brief}</div></td>
+      <td style="text-align:center;font-weight:600;color:var(--cyan)">#${g.overallRank}</td>
+      <td style="text-align:center">
+        <div style="font-weight:600;color:var(--text-secondary)">#${g.catRank}</div>
+        <div style="font-size:11px;color:var(--text-muted)">${g.category}</div>
+      </td>
+      <td style="color:var(--text-secondary);white-space:nowrap">${g.players}</td>
+      <td style="color:var(--text-secondary);white-space:nowrap">${g.time} min</td>
+      <td style="color:var(--text-secondary)">${g.age}</td>
+      <td>${weightPips(g.weight)} <span style="font-size:11px;color:var(--text-muted)">${g.weight}</span></td>
+      <td class="${g.status==='available'?'status-avail':'status-booked'}">${g.status==='available'?'Available':'In use'}</td>
+    </tr>
+  `).join('');
+});
+</script>
+</body>
+</html>

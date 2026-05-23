@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schedule — Playhouse Social</title>
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    .tab-container { width: 100%; }
+    .table-wrap {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+    }
+    .table-wrap table { width: 100%; }
+    .bgg-stats { display: flex; flex-direction: column; gap: 2px; }
+    .bgg-rank { font-size: 13px; font-weight: 600; color: var(--cyan); }
+    .bgg-meta { font-size: 11px; color: var(--text-muted); }
+
+    /* Booking detail card */
+    .booking-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-6);
+    }
+    .booking-left { padding-right: var(--sp-6); border-right: 1px solid var(--border); }
+    .booking-game-name {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      color: var(--white);
+      letter-spacing: 0.03em;
+      margin-bottom: var(--sp-2);
+      text-decoration: underline;
+      text-underline-offset: 6px;
+    }
+    .booking-time { font-size: 14px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-secondary); margin-bottom: var(--sp-1); }
+    .booking-loc  { font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: var(--sp-5); }
+    .players-grid { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: var(--sp-3); }
+
+    .bgg-stats-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-5);
+      margin-bottom: var(--sp-4);
+      flex-wrap: wrap;
+    }
+    .bgg-stat-item { display: flex; flex-direction: column; gap: 2px; text-align: center; }
+    .bgg-stat-val { font-family: var(--font-display); font-size: 1.4rem; color: var(--white); letter-spacing: 0.04em; }
+    .bgg-stat-label { font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); }
+    .bgg-logo-text { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); margin-bottom: var(--sp-4); }
+
+    .hype-text { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: var(--sp-5); }
+
+    @media (max-width: 640px) {
+      .booking-card { grid-template-columns: 1fr; }
+      .booking-left { border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; padding-bottom: var(--sp-6); }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell" id="shell"></div>
+
+<script>
+// ---- Mock data (Phase 2: Firestore) ----
+const MY_GAMES = [
+  { id: 'g1', name: 'Ark Nova', year: 2021, date: '06:00 PM, 2 May', location: 'Starbucks, ECity', bggRank: 2, weight: 3.8, age: '14+', status: 'confirmed', players: [{name:'Shreyansh',knows:true},{name:'Shivangi',knows:false},{name:'Prashast',knows:false},{name:'Loki',knows:true},{name:'Perseus',knows:true}], hype: 'Build the most successful ark by funding conservation projects across the globe. Engine-building at its finest.' },
+  { id: 'g2', name: 'Scythe',   year: 2016, date: '06:00 PM, 2 May', location: 'Starbucks, ECity', bggRank: 26, weight: 3.45, age: '14+', status: 'confirmed', players: [{name:'Shreyansh',knows:true},{name:'Loki',knows:true},{name:'Maximus',knows:false}], hype: 'Five factions vie for dominance in a war-torn, dieselpunk 1920s Europe. Area control meets engine building.' },
+  { id: 'g3', name: 'Wyrmspan', year: 2024, date: '06:00 PM, 2 May', location: 'Starbucks, ECity', bggRank: 123, weight: 2.83, age: '14+', status: 'waitlisted', waitlistPos: 2, players: [{name:'Perseus',knows:true},{name:'Shivangi',knows:false}], hype: 'A lush cave for dragons to roost and thrive. Wingspan meets fantasy in this card-driven engine builder.' },
+];
+
+const UPCOMING_GAMES = [
+  { id: 'u1', name: 'Ark Nova',  year: 2021, date: '06:00 PM, 9 May', location: 'Starbucks, ECity', bggRank: 2,   weight: 3.8,  age: '14+', filled: 5, total: 8, players: [{name:'Maximus',knows:true},{name:'Perseus',knows:true},{name:'Loki',knows:false},{name:'Shivangi',knows:false},{name:'Prashast',knows:true}], hype: 'Build the most successful ark by funding conservation projects across the globe. Engine-building at its finest.' },
+  { id: 'u2', name: 'Scythe',   year: 2016, date: '06:00 PM, 9 May', location: 'Starbucks, ECity', bggRank: 26,  weight: 3.45, age: '14+', filled: 5, total: 8, players: [{name:'Maximus',knows:true},{name:'Perseus',knows:false}], hype: 'Five factions vie for dominance in a war-torn, dieselpunk 1920s Europe. Area control meets engine building.' },
+  { id: 'u3', name: 'Wyrmspan', year: 2024, date: '06:00 PM, 16 May', location: 'Starbucks, ECity', bggRank: 123, weight: 2.83, age: '14+', filled: 8, total: 8, waitlist: 3, players: [{name:'Maximus',knows:true},{name:'Loki',knows:true},{name:'Shivangi',knows:false},{name:'Prashast',knows:true},{name:'Perseus',knows:false},{name:'Nipun',knows:true},{name:'Arijit',knows:false},{name:'Shruti',knows:true}], hype: 'A lush cave for dragons to roost and thrive. Wingspan meets fantasy in this card-driven engine builder.' },
+];
+
+function statusBadge(g) {
+  if (g.status === 'confirmed')  return `<span class="badge badge-green"><span class="badge-dot"></span>Paid, Confirmed</span>`;
+  if (g.status === 'waitlisted') return `<span class="badge badge-yellow"><span class="badge-dot"></span>Paid, Waitlisted (${g.waitlistPos})</span>`;
+  if (g.status === 'cancelled')  return `<span class="badge badge-red"><span class="badge-dot"></span>Cancelled</span>`;
+  return '';
+}
+
+function renderMyGames() {
+  return `<table class="data-table">
+    <thead>
+      <tr>
+        <th>Game name</th>
+        <th>Time & date</th>
+        <th>Location</th>
+        <th>BGG stats</th>
+        <th>My status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      ${MY_GAMES.map(g => `
+        <tr>
+          <td style="font-weight:600">${g.name} <span style="color:var(--text-muted);font-weight:400">(${g.year})</span></td>
+          <td style="white-space:nowrap;color:var(--text-secondary)">${g.date}</td>
+          <td style="color:var(--text-secondary)">${g.location}</td>
+          <td>
+            <div class="bgg-stats">
+              <span class="bgg-rank">#${g.bggRank}</span>
+              <span class="bgg-meta">${g.weight}/5 · ${g.age}</span>
+            </div>
+          </td>
+          <td>${statusBadge(g)}</td>
+          <td><button class="chevron-btn" onclick="openBookingModal('my','${g.id}')">›</button></td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>`;
+}
+
+function renderUpcomingGames() {
+  return `<table class="data-table">
+    <thead>
+      <tr>
+        <th>Game name</th>
+        <th>Time & date</th>
+        <th>Location</th>
+        <th>BGG stats</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      ${UPCOMING_GAMES.map(g => {
+        const pct = Math.round((g.filled / g.total) * 100);
+        const full = g.filled >= g.total;
+        return `
+          <tr>
+            <td style="font-weight:600">${g.name} <span style="color:var(--text-muted);font-weight:400">(${g.year})</span></td>
+            <td style="white-space:nowrap;color:var(--text-secondary)">${g.date}</td>
+            <td style="color:var(--text-secondary)">${g.location}</td>
+            <td>
+              <div class="bgg-stats">
+                <span class="bgg-rank">#${g.bggRank}</span>
+                <span class="bgg-meta">${g.weight}/5 · ${g.age}</span>
+              </div>
+            </td>
+            <td style="min-width:140px">
+              <div class="capacity-bar-track" style="margin-bottom:3px">
+                <div class="capacity-bar-fill ${full?'full':'has-space'}" style="width:${pct}%"></div>
+              </div>
+              <span class="capacity-label">(${g.filled}/${g.total})</span>
+              ${g.waitlist ? `<div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--status-red);margin-top:2px">Waitlist: ${g.waitlist}</div>` : ''}
+            </td>
+            <td><button class="chevron-btn" onclick="openBookingModal('upcoming','${g.id}')">›</button></td>
+          </tr>
+        `;
+      }).join('')}
+    </tbody>
+  </table>`;
+}
+
+function openBookingModal(type, id) {
+  const list = type === 'my' ? MY_GAMES : UPCOMING_GAMES;
+  const g = list.find(x => x.id === id);
+  if (!g) return;
+
+  const isUpcoming = type === 'upcoming';
+  const isFull = isUpcoming && g.filled >= g.total;
+  const pct = isUpcoming ? Math.round((g.filled / g.total) * 100) : 0;
+
+  const playersHTML = g.players.map(p =>
+    `<span class="player-pill ${p.knows ? 'knows-game' : 'needs-teaching'}">${p.name}</span>`
+  ).join('');
+
+  const rightCol = isUpcoming ? `
+    <div class="bgg-logo-text">Board Game Geek Stats</div>
+    <div class="bgg-stats-row">
+      <div class="bgg-stat-item"><div class="bgg-stat-val neon-amber">#${g.bggRank}</div><div class="bgg-stat-label">Global rank</div></div>
+      <div class="bgg-stat-item"><div class="bgg-stat-val">${g.weight}/5</div><div class="bgg-stat-label">Weight</div></div>
+      <div class="bgg-stat-item"><div class="bgg-stat-val">${g.age}</div><div class="bgg-stat-label">Age</div></div>
+    </div>
+    <p class="hype-text">${g.hype}</p>
+    <div class="capacity-bar-track" style="margin-bottom:6px">
+      <div class="capacity-bar-fill ${isFull?'full':'has-space'}" style="width:${pct}%"></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--sp-3)">
+      <span class="capacity-label" style="font-size:15px;color:${isFull?'var(--status-red)':'var(--cyan)'}">(${g.filled}/${g.total}) ${isFull ? '— Full' : 'seats available'}</span>
+      ${isFull
+        ? `<button class="btn btn-ghost" onclick="openReserveModal('${g.id}', true)">Join waitlist</button>`
+        : `<button class="btn btn-amber" onclick="openReserveModal('${g.id}', false)">Reserve seat</button>`
+      }
+    </div>
+    ${g.waitlist ? `<div style="margin-top:var(--sp-3);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--status-red)">Current waitlist: ${g.waitlist}</div>` : ''}
+  ` : `
+    <div style="margin-bottom:var(--sp-4)">${statusBadge(g)}</div>
+    <div class="bgg-logo-text">Board Game Geek Stats</div>
+    <div class="bgg-stats-row">
+      <div class="bgg-stat-item"><div class="bgg-stat-val neon-amber">#${g.bggRank}</div><div class="bgg-stat-label">Global rank</div></div>
+      <div class="bgg-stat-item"><div class="bgg-stat-val">${g.weight}/5</div><div class="bgg-stat-label">Weight</div></div>
+      <div class="bgg-stat-item"><div class="bgg-stat-val">${g.age}</div><div class="bgg-stat-label">Age</div></div>
+    </div>
+    <p class="hype-text">${g.hype}</p>
+  `;
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="booking-card">
+      <div class="booking-left">
+        <div class="booking-game-name">${g.name}</div>
+        <div class="booking-time">${g.date}</div>
+        <div class="booking-loc">${g.location}</div>
+        <div class="t-label" style="margin-bottom:var(--sp-2)">Players</div>
+        <div class="players-grid">${playersHTML}</div>
+        <div style="margin-top:var(--sp-3);display:flex;gap:var(--sp-4);font-size:11px;color:var(--text-muted)">
+          <span><span style="color:var(--green-neon)">●</span> Knows the game</span>
+          <span><span style="color:var(--amber)">●</span> Needs teaching</span>
+        </div>
+      </div>
+      <div>${rightCol}</div>
+    </div>
+  `;
+
+  openModal('booking-modal');
+}
+
+function openReserveModal(gameId, isWaitlist) {
+  closeModal('booking-modal');
+  document.getElementById('reserve-title').textContent = isWaitlist ? 'Join the waitlist' : 'Reserve your seat';
+  document.getElementById('reserve-subtitle').textContent = isWaitlist
+    ? "You'll be notified if a spot opens up."
+    : "Confirm your booking details below.";
+  document.getElementById('reserve-confirm-btn').textContent = isWaitlist ? 'Join waitlist' : 'Confirm reservation';
+  document.getElementById('reserve-modal').setAttribute('data-game', gameId);
+  openModal('reserve-modal');
+}
+
+function confirmReservation() {
+  // Phase 2: Firestore write booking
+  closeModal('reserve-modal');
+  alert('Booking confirmed! (Firebase integration in Phase 2)');
+}
+</script>
+
+<script src="../js/app.js"></script>
+<script src="../js/shell.js"></script>
+<script>
+document.getElementById('shell').innerHTML = buildShell('schedule') + `
+  <div class="page-body">
+    <h1 class="page-title">Schedule</h1>
+
+    <div class="tab-container">
+      <div class="tabs" id="schedule-tabs">
+        <button class="tab-btn active" data-tab="my-games" onclick="switchTab('my-games')">My games</button>
+        <button class="tab-btn" data-tab="upcoming-games" onclick="switchTab('upcoming-games')">Upcoming games</button>
+      </div>
+
+      <div class="table-wrap" id="table-wrap">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking detail modal -->
+  <div class="modal-overlay" id="booking-modal">
+    <div class="modal" style="max-width:720px;width:100%">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:var(--sp-4)">
+        <button onclick="closeModal('booking-modal')" style="color:var(--text-muted);font-size:20px;cursor:pointer;background:none;border:none">✕</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Reserve / waitlist modal -->
+  <div class="modal-overlay" id="reserve-modal">
+    <div class="modal" style="max-width:440px">
+      <h3 id="reserve-title" style="font-size:1.3rem;font-weight:700;margin-bottom:var(--sp-2)">Reserve your seat</h3>
+      <p id="reserve-subtitle" class="text-secondary" style="font-size:14px;margin-bottom:var(--sp-6)"></p>
+      <div class="form-group" style="margin-bottom:var(--sp-5)">
+        <label class="form-label">Do you need a teach / walkthrough?</label>
+        <div style="display:flex;gap:var(--sp-3);margin-top:var(--sp-2)">
+          <label style="display:flex;align-items:center;gap:var(--sp-2);font-size:14px;cursor:pointer">
+            <input type="radio" name="teach" value="no" checked> No, I know this game
+          </label>
+          <label style="display:flex;align-items:center;gap:var(--sp-2);font-size:14px;cursor:pointer">
+            <input type="radio" name="teach" value="yes"> Yes, please teach me
+          </label>
+        </div>
+      </div>
+      <div style="display:flex;gap:var(--sp-3);justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('reserve-modal')">Cancel</button>
+        <button class="btn btn-primary" id="reserve-confirm-btn" onclick="confirmReservation()">Confirm reservation</button>
+      </div>
+    </div>
+  </div>
+` + closeShell();
+
+let currentTab = 'my-games';
+
+function switchTab(tab) {
+  currentTab = tab;
+  const btns = document.querySelectorAll('.tab-btn');
+  btns.forEach(b => b.classList.toggle('active', b.getAttribute('data-tab') === tab));
+  document.getElementById('table-wrap').innerHTML =
+    tab === 'my-games' ? renderMyGames() : renderUpcomingGames();
+}
+
+// Init on load
+document.addEventListener('DOMContentLoaded', () => {
+  switchTab('my-games');
+});
+</script>
+</body>
+</html>

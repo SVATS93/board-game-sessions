@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>God Mode — Playhouse Social Admin</title>
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    body { background: var(--black); }
+    .admin-header {
+      height: var(--header-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--sp-8);
+    }
+    .admin-logo-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+    }
+    .admin-wordmark-sm {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      letter-spacing: 0.06em;
+      color: var(--amber);
+      line-height: 1;
+    }
+    .admin-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--black);
+      background: var(--amber);
+      padding: 2px 8px;
+      border-radius: var(--r-full);
+    }
+    .god-mode-content {
+      padding: var(--sp-10) var(--sp-8);
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .god-mode-title {
+      font-family: var(--font-display);
+      font-size: 3.5rem;
+      color: var(--amber);
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 40px rgba(245,166,35,0.3);
+      margin-bottom: var(--sp-2);
+    }
+    .god-mode-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: var(--sp-10);
+    }
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-5);
+    }
+    @media (max-width: 640px) { .tile-grid { grid-template-columns: 1fr 1fr; } }
+    .admin-tile {
+      background: var(--cyan);
+      border-radius: var(--r-lg);
+      padding: var(--sp-6) var(--sp-5);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-4);
+      cursor: pointer;
+      transition: all var(--t-base) var(--ease);
+      color: var(--black);
+      border: 1px solid transparent;
+    }
+    .admin-tile:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(0,209,220,0.25);
+    }
+    .admin-tile.current {
+      background: rgba(0,209,220,0.15);
+      color: var(--cyan);
+      border-color: var(--cyan);
+    }
+    .admin-tile.current:hover { background: rgba(0,209,220,0.22); }
+    .tile-icon { font-size: 24px; flex-shrink: 0; }
+    .tile-label { font-size: 14px; font-weight: 700; letter-spacing: 0.02em; line-height: 1.3; }
+    .placeholder-note {
+      margin-top: var(--sp-10);
+      padding: var(--sp-5) var(--sp-6);
+      background: var(--surface-2);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--r-lg);
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    .placeholder-note strong { color: var(--cyan); }
+  </style>
+</head>
+<body>
+  <header class="admin-header">
+    <div class="admin-logo-row">
+      <div class="admin-wordmark-sm">PLAYHOUSE SOCIAL</div>
+      <span class="admin-badge">Admin</span>
+    </div>
+    <button class="btn-logout" onclick="window.location.href='index.html'">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Logout
+    </button>
+  </header>
+
+  <div class="god-mode-content">
+    <div class="god-mode-title">God Mode</div>
+    <div class="god-mode-sub">Welcome back. Select a module to manage.</div>
+
+    <div class="tile-grid">
+      <div class="admin-tile current">
+        <span class="tile-icon">🔑</span>
+        <span class="tile-label">Admin</span>
+      </div>
+      <div class="admin-tile" onclick="comingSoon('Manage Profiles')">
+        <span class="tile-icon">👥</span>
+        <span class="tile-label">Manage Profiles</span>
+      </div>
+      <div class="admin-tile" onclick="comingSoon('Schedule Updates')">
+        <span class="tile-icon">📅</span>
+        <span class="tile-label">Schedule Updates</span>
+      </div>
+      <div class="admin-tile" onclick="comingSoon('Check Bookings')">
+        <span class="tile-icon">🎟️</span>
+        <span class="tile-label">Check Bookings</span>
+      </div>
+      <div class="admin-tile" onclick="comingSoon('Manage Score & Leaderboard')">
+        <span class="tile-icon">🏆</span>
+        <span class="tile-label">Manage Score &amp; Leaderboard</span>
+      </div>
+      <div class="admin-tile" onclick="comingSoon('Library Updation')">
+        <span class="tile-icon">📚</span>
+        <span class="tile-label">Library Updation</span>
+      </div>
+      <div class="admin-tile" onclick="comingSoon('Announcements Push')">
+        <span class="tile-icon">📣</span>
+        <span class="tile-label">Announcements Push</span>
+      </div>
+      <div class="admin-tile" onclick="comingSoon('FAQs Updation')">
+        <span class="tile-icon">❓</span>
+        <span class="tile-label">FAQs Updation</span>
+      </div>
+      <div class="admin-tile" onclick="comingSoon('Community Guidelines Updation')">
+        <span class="tile-icon">📋</span>
+        <span class="tile-label">Community Guidelines Updation</span>
+      </div>
+    </div>
+
+    <div class="placeholder-note">
+      <strong>Admin screens — Phase 2:</strong> Each tile above will link to its management screen. These will be built after player-facing sign-off. The design will follow the same visual language as the player side, with data powered by Firebase.
+    </div>
+  </div>
+
+  <link rel="stylesheet" href="../css/design-system.css">
+  <script>
+    function comingSoon(name) {
+      alert(name + ' — coming in Admin Phase 2.');
+    }
+  </script>
+</body>
+</html>

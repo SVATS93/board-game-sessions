@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile — Playhouse Social</title>
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    .profile-form { max-width: 520px; display: flex; flex-direction: column; gap: var(--sp-5); }
+    .save-row { display: flex; align-items: center; gap: var(--sp-4); margin-top: var(--sp-2); }
+    .save-confirm { font-size: 13px; color: var(--status-green); opacity: 0; transition: opacity var(--t-base) var(--ease); }
+    .save-confirm.show { opacity: 1; }
+    .profile-header-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-6);
+      margin-bottom: var(--sp-8);
+    }
+    .avatar-large {
+      width: 72px; height: 72px;
+      border-radius: var(--r-full);
+      background: var(--amber-glow);
+      border: 2px solid var(--amber);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      color: var(--amber);
+      text-shadow: 0 0 10px rgba(245,166,35,0.4);
+      flex-shrink: 0;
+    }
+    .profile-meta { display: flex; flex-direction: column; gap: var(--sp-1); }
+    .profile-meta .username {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      letter-spacing: 0.04em;
+      color: var(--white);
+    }
+    .profile-meta .gamer-since {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .profile-meta .gamer-since span { color: var(--cyan); }
+  </style>
+</head>
+<body>
+<div class="app-shell" id="shell"></div>
+
+<script src="../js/app.js"></script>
+<script src="../js/shell.js"></script>
+<script>
+document.getElementById('shell').innerHTML = buildShell('profile') + `
+  <div class="page-body">
+    <div class="profile-header-row">
+      <div class="avatar-large" id="profile-avatar">SV</div>
+      <div class="profile-meta">
+        <div class="username" id="profile-name">Shreyansh Vats</div>
+        <div class="gamer-since">Gamer since <span id="profile-since">Apr 2026</span></div>
+      </div>
+    </div>
+
+    <h1 class="page-title">My Profile</h1>
+
+    <div class="profile-form card">
+      <div class="form-group">
+        <label class="form-label">First name</label>
+        <input type="text" class="form-input" id="f-fname" placeholder="First name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last name</label>
+        <input type="text" class="form-input" id="f-lname" placeholder="Last name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mobile number</label>
+        <input type="tel" class="form-input" id="f-phone" placeholder="+91 98765 43210">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="f-email" placeholder="you@example.com">
+      </div>
+      <div class="save-row">
+        <button class="btn btn-primary" onclick="saveProfile()">Update profile</button>
+        <span class="save-confirm" id="save-confirm">✓ Saved!</span>
+      </div>
+    </div>
+  </div>
+` + closeShell();
+
+// Pre-fill from mock user
+document.addEventListener('DOMContentLoaded', () => {
+  const u = PHS.currentUser;
+  const [fn, ln] = u.displayName.split(' ');
+  document.getElementById('f-fname').value  = fn || '';
+  document.getElementById('f-lname').value  = ln || '';
+  document.getElementById('f-phone').value  = u.phone || '';
+  document.getElementById('f-email').value  = u.email || '';
+  document.getElementById('profile-name').textContent  = u.displayName;
+  document.getElementById('profile-since').textContent = u.gamerSince;
+  const initials = (fn?.[0] || '') + (ln?.[0] || '');
+  document.getElementById('profile-avatar').textContent = initials.toUpperCase();
+});
+
+function saveProfile() {
+  // Phase 2: Firebase Firestore update
+  const confirm = document.getElementById('save-confirm');
+  confirm.classList.add('show');
+  setTimeout(() => confirm.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Score & Leaderboard — Playhouse Social</title>
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    .leaderboard-table th { color: var(--cyan); }
+    .leaderboard-row-me td { background: rgba(0,209,220,0.06); }
+    .leaderboard-row-me td:first-child { border-left: 3px solid var(--cyan); }
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      border-radius: var(--r-full);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .rank-1 { background: rgba(245,166,35,0.15); color: var(--amber); }
+    .rank-2 { background: rgba(176,176,176,0.12); color: #b0b0b0; }
+    .rank-3 { background: rgba(205,127,50,0.12); color: #cd7f32; }
+    .rank-other { color: var(--text-muted); font-size: 13px; padding: 0 6px; }
+    .scorecard-winner { color: var(--amber); font-size: 14px; }
+    .scores-list { font-size: 13px; line-height: 1.8; color: var(--text-secondary); }
+    .scores-list .winner { color: var(--amber); font-weight: 600; }
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sp-4); margin-bottom: var(--sp-6); }
+    @media (max-width: 700px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+<div class="app-shell" id="shell"></div>
+
+<script>
+const SCORECARDS = [
+  { game: 'Ark Nova (2021)',  date: '06:00 PM, 2 May', location: 'Starbucks, ECity',
+    scores: [{name:'Maximus',score:87,winner:true},{name:'Prashast',score:85},{name:'Shivangi',score:80},{name:'Shreyansh',score:78}] },
+  { game: 'Jaipur (2009)',   date: '06:00 PM, 3 May', location: 'Starbucks, ECity',
+    scores: [{name:'Shivangi',score:80,winner:true},{name:'Shreyansh',score:78}] },
+  { game: 'Scythe (2016)',   date: '06:00 PM, 4 May', location: 'Starbucks, ECity',
+    scores: [{name:'Maximus',score:87,winner:true},{name:'Prashast',score:85},{name:'Shivangi',score:80},{name:'Shreyansh',score:78}] },
+];
+
+const LEADERBOARD = [
+  { name:'Maximus',       phs:316, rank:1, hrs:37, games:163 },
+  { name:'Perseus',       phs:308, rank:2, hrs:32, games:123 },
+  { name:'Loki',          phs:306, rank:3, hrs:29, games:92 },
+  { name:'Shreyansh Vats',phs:298, rank:4, hrs:29, games:92,  isMe:true },
+  { name:'Shivangi Tripathi', phs:245, rank:5, hrs:24, games:74 },
+  { name:'Prashast Vats', phs:243, rank:6, hrs:21, games:32 },
+  { name:'Nipun Verma',   phs:131, rank:7, hrs:18, games:28 },
+  { name:'Arijit Roy',    phs:111, rank:8, hrs:19, games:28 },
+];
+
+// My stats (from leaderboard row)
+const ME = LEADERBOARD.find(x => x.isMe);
+
+function rankBadge(r) {
+  if (r === 1) return `<span class="rank-badge rank-1">🥇</span>`;
+  if (r === 2) return `<span class="rank-badge rank-2">🥈</span>`;
+  if (r === 3) return `<span class="rank-badge rank-3">🥉</span>`;
+  return `<span class="rank-other">${r}</span>`;
+}
+
+function renderScorecards() {
+  return `<div class="table-wrap" style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Game name</th>
+          <th>Time & date</th>
+          <th>Location</th>
+          <th>Scores</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${SCORECARDS.map(s => `
+          <tr>
+            <td style="font-weight:600">${s.game}</td>
+            <td style="white-space:nowrap;color:var(--text-secondary)">${s.date}</td>
+            <td style="color:var(--text-secondary)">${s.location}</td>
+            <td>
+              <div class="scores-list">
+                ${s.scores.map((p,i) => `
+                  <div class="${p.winner ? 'winner' : ''}">
+                    ${p.winner ? '👑 ' : ''}${p.name} — ${p.score}
+                  </div>
+                `).join('')}
+              </div>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function renderLeaderboard() {
+  return `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-value">${ME.hrs} hrs</div><div class="stat-label">Total hours played</div></div>
+      <div class="stat-card"><div class="stat-value">${ME.games}</div><div class="stat-label">Unique games played</div></div>
+      <div class="stat-card"><div class="stat-value">6</div><div class="stat-label">Unique gamers met</div></div>
+      <div class="stat-card"><div class="stat-value">Apr 2026</div><div class="stat-label">Gamer since</div></div>
+    </div>
+    <div class="table-wrap" style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden">
+      <table class="data-table leaderboard-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>PHS score</th>
+            <th>Hrs played</th>
+            <th>Games played</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${LEADERBOARD.map(p => `
+            <tr class="${p.isMe ? 'leaderboard-row-me' : ''}">
+              <td>${rankBadge(p.rank)}</td>
+              <td style="font-weight:${p.isMe?'700':'500'};color:${p.isMe?'var(--cyan)':'var(--text-primary)'}">${p.name}${p.isMe?' <span style="font-size:11px;color:var(--cyan);opacity:.7">(you)</span>':''}</td>
+              <td style="font-family:var(--font-display);font-size:1.1rem;color:${p.rank<=3?'var(--amber)':'var(--text-primary)'}">${p.phs}</td>
+              <td style="color:var(--text-secondary)">${p.hrs}</td>
+              <td style="color:var(--text-secondary)">${p.games}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:var(--sp-4);padding:var(--sp-4);background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);font-size:12px;color:var(--text-muted)">
+      <strong style="color:var(--cyan)">PHS Score formula:</strong>
+      (40·√HR + 30·√GR + 30·√SR) × (1 + log(1 + D/30))
+      &nbsp;—&nbsp; Normalised by weeks active so new players can compete fairly.
+    </div>
+  `;
+}
+</script>
+
+<script src="../js/app.js"></script>
+<script src="../js/shell.js"></script>
+<script>
+document.getElementById('shell').innerHTML = buildShell('scores') + `
+  <div class="page-body">
+    <h1 class="page-title">Score &amp; Leaderboard</h1>
+
+    <div class="tab-container">
+      <div class="tabs" id="score-tabs">
+        <button class="tab-btn active" onclick="switchTab('scorecards')">My scorecards</button>
+        <button class="tab-btn" onclick="switchTab('leaderboard')">Leaderboard</button>
+      </div>
+      <div id="score-content"></div>
+    </div>
+  </div>
+` + closeShell();
+
+function switchTab(tab) {
+  const btns = document.querySelectorAll('.tab-btn');
+  btns[0].classList.toggle('active', tab === 'scorecards');
+  btns[1].classList.toggle('active', tab === 'leaderboard');
+  document.getElementById('score-content').innerHTML =
+    tab === 'scorecards' ? renderScorecards() : renderLeaderboard();
+}
+
+document.addEventListener('DOMContentLoaded', () => switchTab('scorecards'));
+</script>
+</body>
+</html>

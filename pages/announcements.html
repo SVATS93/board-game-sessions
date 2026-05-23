@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Announcements — Playhouse Social</title>
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    .announcement-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: var(--sp-6);
+      transition: border-color var(--t-fast) var(--ease);
+      border-left: 3px solid var(--cyan);
+    }
+    .announcement-card:hover { border-color: var(--border-accent); }
+    .announcement-card.pinned { border-left-color: var(--amber); }
+    .ann-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--sp-3); gap:var(--sp-4); flex-wrap:wrap; }
+    .ann-title { font-size:15px; font-weight:700; color:var(--white); }
+    .ann-date  { font-size:12px; color:var(--text-muted); white-space:nowrap; flex-shrink:0; }
+    .ann-body  { font-size:14px; color:var(--text-secondary); line-height:1.7; }
+    .pin-tag { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--amber); margin-bottom:var(--sp-2); }
+  </style>
+</head>
+<body>
+<div class="app-shell" id="shell"></div>
+
+<script src="../js/app.js"></script>
+<script src="../js/shell.js"></script>
+<script>
+const ANNOUNCEMENTS = [
+  { pinned:true,  title:'Welcome to Playhouse Social!', date:'1 Apr 2026', body:'We\'re thrilled to launch our community platform. Here you can check your game schedule, track scores, browse our game library, and stay updated with all things Playhouse Social. Kidulting made fun!' },
+  { pinned:false, title:'New venue from May — Starbucks ECity', date:'15 Apr 2026', body:'We\'ve secured a regular spot at Starbucks, Electronic City, Bengaluru every Friday from 6 PM onwards. Seats are limited, so make sure to reserve in advance through the Schedule section.' },
+  { pinned:false, title:'Game of the Month: Ark Nova', date:'1 May 2026', body:'May\'s featured game is Ark Nova (2021). We\'ll be running multiple sessions throughout the month. Rated #2 on BoardGameGeek, this is a must-play for strategy enthusiasts. Look out for teaching sessions if you\'re new!' },
+  { pinned:false, title:'PHS Leaderboard is live!', date:'5 May 2026', body:'The PlayHouse Social leaderboard scoring is now active. Your PHS score is calculated based on hours played, game diversity, and unique gamers you\'ve met — all normalised so newcomers can still compete. Check the Score & Leaderboard section.' },
+];
+
+document.getElementById('shell').innerHTML = buildShell('announcements') + `
+  <div class="page-body">
+    <h1 class="page-title">Announcements</h1>
+    <div style="display:flex;flex-direction:column;gap:var(--sp-4)">
+      ${ANNOUNCEMENTS.map(a => `
+        <div class="announcement-card ${a.pinned?'pinned':''}">
+          ${a.pinned ? '<div class="pin-tag">📌 Pinned</div>' : ''}
+          <div class="ann-header">
+            <div class="ann-title">${a.title}</div>
+            <div class="ann-date">${a.date}</div>
+          </div>
+          <div class="ann-body">${a.body}</div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+` + closeShell();
+</script>
+</body>
+</html>
