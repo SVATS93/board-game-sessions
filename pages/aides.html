@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Player Aides — Playhouse Social</title>
+  <link rel="stylesheet" href="../css/design-system.css">
+  <style>
+    /* ---- Tool cards ---- */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-6);
+      align-items: start;
+    }
+    @media (max-width: 1100px) { .tools-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 640px)  { .tools-grid { grid-template-columns: 1fr; } }
+
+    .tool-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: var(--sp-6);
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-5);
+    }
+    .tool-header {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: var(--sp-4);
+    }
+    .tool-icon {
+      width: 40px; height: 40px;
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .tool-icon-cyan   { background: var(--cyan-glow); border: 1px solid var(--border-accent); }
+    .tool-icon-amber  { background: var(--amber-glow); border: 1px solid rgba(245,166,35,0.3); }
+    .tool-icon-purple { background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.25); }
+    .tool-title { font-size: 15px; font-weight: 700; color: var(--white); }
+    .tool-desc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ============================================================
+       TOOL 1 — FIRST PLAYER SELECTOR
+       ============================================================ */
+    .fps-players {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+      min-height: 36px;
+    }
+    .fps-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: 4px 10px 4px 12px;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      border-radius: var(--r-full);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .fps-tag button {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: color var(--t-fast);
+    }
+    .fps-tag button:hover { color: var(--status-red); }
+    .fps-add-row {
+      display: flex;
+      gap: var(--sp-2);
+    }
+    .fps-result {
+      text-align: center;
+      padding: var(--sp-5);
+      background: var(--surface-3);
+      border-radius: var(--r-lg);
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-2);
+      border: 1px solid var(--border);
+      transition: border-color var(--t-base);
+    }
+    .fps-result.winner { border-color: var(--amber); background: var(--amber-glow); }
+    .fps-winner-name {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      letter-spacing: 0.05em;
+      color: var(--amber);
+      text-shadow: 0 0 20px rgba(245,166,35,0.4);
+    }
+    .fps-winner-label { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+    @keyframes spin-name {
+      0%   { opacity: 0; transform: scale(0.8) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .fps-winner-name.animate { animation: spin-name 0.4s var(--ease) both; }
+
+    /* ============================================================
+       TOOL 2 — DICE ROLLER
+       ============================================================ */
+    .dice-config {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+    }
+    .dice-type-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+    }
+    .dice-btn {
+      padding: var(--sp-2) var(--sp-3);
+      border-radius: var(--r-md);
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--surface-3);
+      border: 1.5px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--t-fast) var(--ease);
+      min-width: 48px;
+      text-align: center;
+    }
+    .dice-btn.active {
+      background: var(--cyan-glow);
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+    .dice-btn:hover:not(.active) { border-color: var(--text-muted); color: var(--text-primary); }
+
+    .dice-count-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+    }
+    .dice-count-btn {
+      width: 32px; height: 32px;
+      border-radius: var(--r-full);
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all var(--t-fast);
+    }
+    .dice-count-btn:hover { background: var(--cyan-glow); border-color: var(--cyan); color: var(--cyan); }
+    .dice-count-val {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--white);
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .dice-results {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-3);
+      min-height: 60px;
+      align-items: center;
+      justify-content: center;
+    }
+    .die {
+      width: 52px; height: 52px;
+      background: var(--surface-3);
+      border: 2px solid var(--border);
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--cyan);
+      transition: all var(--t-fast);
+    }
+    .die.rolling {
+      animation: die-roll 0.5s var(--ease) both;
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0,209,220,0.25);
+    }
+    @keyframes die-roll {
+      0%   { transform: rotate(-15deg) scale(0.8); opacity: 0.3; }
+      50%  { transform: rotate(8deg) scale(1.1); }
+      100% { transform: rotate(0deg) scale(1); opacity: 1; }
+    }
+    .dice-total {
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+    .dice-total span { color: var(--cyan); font-size: 1.4rem; }
+
+    /* ============================================================
+       TOOL 3 — SCORE TRACKER (spans full width)
+       ============================================================ */
+    .score-tracker { grid-column: 1 / -1; }
+
+    .tracker-setup {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-4);
+    }
+    .preset-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+    }
+    .preset-btn {
+      padding: var(--sp-2) var(--sp-4);
+      border-radius: var(--r-full);
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--t-fast);
+    }
+    .preset-btn:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-glow); }
+
+    .tracker-players-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+    }
+    .tracker-player-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--sp-2);
+      padding: 4px 10px 4px 12px;
+      border-radius: var(--r-full);
+      font-size: 13px;
+      font-weight: 600;
+      border: 1.5px solid;
+    }
+    .tracker-player-tag button {
+      background: none; border: none; cursor: pointer;
+      font-size: 14px; line-height: 1; opacity: 0.6;
+      transition: opacity var(--t-fast);
+    }
+    .tracker-player-tag button:hover { opacity: 1; }
+
+    /* Player colours */
+    .pc-0 { color: var(--cyan);   border-color: rgba(0,209,220,0.3);   background: rgba(0,209,220,0.08); }
+    .pc-1 { color: var(--amber);  border-color: rgba(245,166,35,0.3);  background: rgba(245,166,35,0.08); }
+    .pc-2 { color: var(--pink);   border-color: rgba(255,107,186,0.3); background: rgba(255,107,186,0.08); }
+    .pc-3 { color: var(--green-neon); border-color: rgba(57,255,156,0.3); background: rgba(57,255,156,0.06); }
+    .pc-4 { color: var(--blue);   border-color: rgba(91,156,246,0.3);  background: rgba(91,156,246,0.08); }
+    .pc-5 { color: #c084fc;       border-color: rgba(192,132,252,0.3); background: rgba(192,132,252,0.08); }
+
+    /* Score table */
+    .score-table-wrap {
+      overflow-x: auto;
+      border-radius: var(--r-lg);
+      border: 1px solid var(--border);
+    }
+    .score-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 400px;
+    }
+    .score-table th {
+      padding: var(--sp-3) var(--sp-4);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--border);
+    }
+    .score-table th.player-col { text-align: center; }
+    .score-table td {
+      padding: var(--sp-3) var(--sp-4);
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .score-table tr:last-child td { border-bottom: none; }
+    .score-table .round-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .score-input {
+      width: 70px;
+      background: var(--surface-3);
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 4px 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      color: var(--text-primary);
+      transition: border-color var(--t-fast);
+    }
+    .score-input:focus { outline: none; border-color: var(--cyan); }
+    .total-row td { background: var(--surface-3); font-weight: 700; }
+    .total-val {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+    .winner-col { position: relative; }
+    .winner-col::after {
+      content: '👑';
+      position: absolute;
+      top: -8px; right: -4px;
+      font-size: 14px;
+    }
+
+    .tracker-controls {
+      display: flex;
+      gap: var(--sp-3);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .round-counter {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+    .round-counter span { color: var(--cyan); font-weight: 700; }
+
+    .winner-banner {
+      display: none;
+      padding: var(--sp-4) var(--sp-6);
+      background: var(--amber-glow);
+      border: 1px solid rgba(245,166,35,0.3);
+      border-radius: var(--r-lg);
+      text-align: center;
+    }
+    .winner-banner.show { display: block; animation: fadeUp 0.4s var(--ease) both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .winner-banner .w-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); }
+    .winner-banner .w-name  { font-family: var(--font-display); font-size: 2rem; color: var(--white); letter-spacing: 0.05em; }
+    .winner-banner .w-score { font-size: 14px; color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+<div class="app-shell" id="shell"></div>
+
+<!-- ============================================================
+     JAVASCRIPT — all three tools
+     ============================================================ -->
+<script>
+
+/* -------- TOOL 1: FIRST PLAYER SELECTOR -------- */
+const fpsPlayers = [];
+
+function fpsAddPlayer() {
+  const input = document.getElementById('fps-input');
+  const name  = input.value.trim();
+  if (!name || fpsPlayers.includes(name)) { input.focus(); return; }
+  fpsPlayers.push(name);
+  input.value = '';
+  renderFpsTags();
+  input.focus();
+}
+
+function fpsRemovePlayer(name) {
+  const i = fpsPlayers.indexOf(name);
+  if (i > -1) fpsPlayers.splice(i, 1);
+  renderFpsTags();
+  resetFpsResult();
+}
+
+function renderFpsTags() {
+  const wrap = document.getElementById('fps-tags');
+  if (!wrap) return;
+  wrap.innerHTML = fpsPlayers.map(n => `
+    <span class="fps-tag">
+      ${n}
+      <button onclick="fpsRemovePlayer('${n}')" title="Remove">✕</button>
+    </span>
+  `).join('');
+}
+
+function resetFpsResult() {
+  const res = document.getElementById('fps-result');
+  res.className = 'fps-result';
+  res.innerHTML = `<span class="fps-winner-label" style="color:var(--text-muted)">Add players and spin!</span>`;
+}
+
+function fpsPickFirst() {
+  if (fpsPlayers.length < 2) {
+    alert('Add at least 2 players first.');
+    return;
+  }
+  const btn = document.getElementById('fps-spin-btn');
+  btn.disabled = true;
+  btn.textContent = 'Spinning…';
+
+  // Flicker through names for suspense
+  const res = document.getElementById('fps-result');
+  res.className = 'fps-result';
+  let flickers = 0;
+  const total  = 12;
+  const chosen = fpsPlayers[Math.floor(Math.random() * fpsPlayers.length)];
+
+  const interval = setInterval(() => {
+    const random = fpsPlayers[Math.floor(Math.random() * fpsPlayers.length)];
+    res.innerHTML = `<div class="fps-winner-name">${random}</div>`;
+    flickers++;
+    if (flickers >= total) {
+      clearInterval(interval);
+      res.classList.add('winner');
+      res.innerHTML = `
+        <div class="fps-winner-label">🎲 First player is</div>
+        <div class="fps-winner-name animate">${chosen}</div>
+        <div class="fps-winner-label" style="margin-top:4px">Good luck!</div>
+      `;
+      btn.disabled = false;
+      btn.textContent = 'Spin again';
+    }
+  }, 80);
+}
+
+/* -------- TOOL 2: DICE ROLLER -------- */
+let selectedDie   = 6;
+let diceCount     = 2;
+
+function selectDie(sides) {
+  selectedDie = sides;
+  document.querySelectorAll('.dice-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.sides) === sides);
+  });
+}
+
+function changeDiceCount(delta) {
+  diceCount = Math.max(1, Math.min(10, diceCount + delta));
+  document.getElementById('dice-count-val').textContent = diceCount;
+}
+
+function rollDice() {
+  const resultsWrap = document.getElementById('dice-results');
+  const totalEl     = document.getElementById('dice-total');
+  const rolls = Array.from({ length: diceCount }, () => Math.floor(Math.random() * selectedDie) + 1);
+  const total = rolls.reduce((a, b) => a + b, 0);
+
+  resultsWrap.innerHTML = rolls.map((r, i) => `
+    <div class="die rolling" style="animation-delay:${i * 60}ms">${r}</div>
+  `).join('');
+
+  totalEl.innerHTML = diceCount > 1
+    ? `Total: <span>${total}</span>`
+    : ``;
+}
+
+/* -------- TOOL 3: SCORE TRACKER -------- */
+const PRESETS = {
+  'Jaipur':    { players: 2, rounds: 3 },
+  'Ark Nova':  { players: 4, rounds: 1 },
+  'Scythe':    { players: 4, rounds: 1 },
+  'Catan':     { players: 4, rounds: 1 },
+  'Wyrmspan':  { players: 4, rounds: 1 },
+  'Azul':      { players: 4, rounds: 5 },
+};
+
+const PLAYER_COLOURS = ['pc-0','pc-1','pc-2','pc-3','pc-4','pc-5'];
+let trackerPlayers = [];
+let trackerRounds  = 3;
+let trackerGame    = 'Custom';
+
+function loadPreset(game) {
+  const p = PRESETS[game];
+  if (!p) return;
+  trackerGame = game;
+  trackerRounds = p.rounds;
+  // suggest player names from community
+  const suggested = ['Shreyansh','Shivangi','Prashast','Loki','Perseus','Maximus'];
+  trackerPlayers = suggested.slice(0, p.players);
+  renderTrackerSetup();
+  buildScoreTable();
+}
+
+function addTrackerPlayer() {
+  const input = document.getElementById('tracker-player-input');
+  const name  = input.value.trim();
+  if (!name || trackerPlayers.includes(name) || trackerPlayers.length >= 6) return;
+  trackerPlayers.push(name);
+  input.value = '';
+  renderTrackerSetup();
+  buildScoreTable();
+}
+
+function removeTrackerPlayer(name) {
+  trackerPlayers = trackerPlayers.filter(n => n !== name);
+  renderTrackerSetup();
+  buildScoreTable();
+}
+
+function renderTrackerSetup() {
+  const wrap = document.getElementById('tracker-player-tags');
+  if (!wrap) return;
+  wrap.innerHTML = trackerPlayers.map((n, i) => `
+    <span class="tracker-player-tag ${PLAYER_COLOURS[i % 6]}">
+      ${n}
+      <button onclick="removeTrackerPlayer('${n}')">✕</button>
+    </span>
+  `).join('');
+}
+
+function addRound() {
+  trackerRounds++;
+  buildScoreTable();
+}
+
+function removeRound() {
+  if (trackerRounds <= 1) return;
+  trackerRounds--;
+  buildScoreTable();
+}
+
+function buildScoreTable() {
+  const wrap = document.getElementById('score-table-wrap');
+  const banner = document.getElementById('winner-banner');
+  banner.classList.remove('show');
+  if (!wrap) return;
+
+  if (trackerPlayers.length < 2) {
+    wrap.innerHTML = `<div style="padding:var(--sp-8);text-align:center;color:var(--text-muted);font-size:14px">Add at least 2 players to start tracking.</div>`;
+    return;
+  }
+
+  const headerCols = trackerPlayers.map((n, i) =>
+    `<th class="player-col" style="color:var(--${colourVar(i)})">${n}</th>`
+  ).join('');
+
+  const bodyRows = Array.from({ length: trackerRounds }, (_, r) => {
+    const cells = trackerPlayers.map((n, i) =>
+      `<td style="text-align:center">
+        <input class="score-input" type="number" min="0"
+          id="score-${r}-${i}" placeholder="—"
+          oninput="recalcTotals()">
+       </td>`
+    ).join('');
+    return `<tr>
+      <td class="round-label">Round ${r + 1}</td>
+      ${cells}
+    </tr>`;
+  }).join('');
+
+  const totalCols = trackerPlayers.map((n, i) =>
+    `<td class="total-val" id="total-${i}" style="color:var(--${colourVar(i)});text-align:center">0</td>`
+  ).join('');
+
+  wrap.innerHTML = `
+    <div class="score-table-wrap">
+      <table class="score-table">
+        <thead>
+          <tr>
+            <th style="color:var(--text-muted)">Round</th>
+            ${headerCols}
+          </tr>
+        </thead>
+        <tbody>${bodyRows}</tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td class="round-label" style="color:var(--text-secondary)">Total</td>
+            ${totalCols}
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  `;
+}
+
+function colourVar(i) {
+  const map = ['cyan','amber','pink','green-neon','blue'];
+  return map[i % map.length];
+}
+
+function recalcTotals() {
+  const totals = trackerPlayers.map((_, i) => {
+    let sum = 0;
+    for (let r = 0; r < trackerRounds; r++) {
+      const el = document.getElementById(`score-${r}-${i}`);
+      sum += el ? (parseFloat(el.value) || 0) : 0;
+    }
+    return sum;
+  });
+
+  // Update totals display
+  totals.forEach((t, i) => {
+    const el = document.getElementById(`total-${i}`);
+    if (el) el.textContent = t;
+  });
+
+  // Highlight winner column
+  const max = Math.max(...totals);
+  if (max === 0) return;
+  const winnerIdx = totals.indexOf(max);
+
+  // Remove previous winner styling
+  document.querySelectorAll('.score-table th.player-col').forEach((th, i) => {
+    th.classList.toggle('winner-col', i === winnerIdx);
+  });
+}
+
+function declareWinner() {
+  if (trackerPlayers.length < 2) return;
+  const totals = trackerPlayers.map((_, i) => {
+    let sum = 0;
+    for (let r = 0; r < trackerRounds; r++) {
+      const el = document.getElementById(`score-${r}-${i}`);
+      sum += el ? (parseFloat(el.value) || 0) : 0;
+    }
+    return sum;
+  });
+  const max = Math.max(...totals);
+  const winnerIdx = totals.indexOf(max);
+  const banner = document.getElementById('winner-banner');
+  document.getElementById('winner-name').textContent  = trackerPlayers[winnerIdx];
+  document.getElementById('winner-score').textContent = `${max} points`;
+  banner.classList.add('show');
+  banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetTracker() {
+  trackerPlayers = [];
+  trackerRounds  = 3;
+  trackerGame    = 'Custom';
+  renderTrackerSetup();
+  buildScoreTable();
+  document.getElementById('winner-banner').classList.remove('show');
+}
+</script>
+
+<script src="../js/app.js"></script>
+<script src="../js/shell.js"></script>
+<script>
+document.getElementById('shell').innerHTML = buildShell('aides') + `
+<div class="page-body">
+  <h1 class="page-title">Player Aides</h1>
+  <p style="color:var(--text-secondary);font-size:14px;margin-bottom:var(--sp-8);margin-top:calc(-1 * var(--sp-4))">
+    Tools to make your game nights run smoother.
+  </p>
+
+  <div class="tools-grid">
+
+    <!-- ======= TOOL 1: FIRST PLAYER SELECTOR ======= -->
+    <div class="tool-card">
+      <div class="tool-header">
+        <div class="tool-icon tool-icon-amber">🎲</div>
+        <div>
+          <div class="tool-title">First Player Selector</div>
+          <div class="tool-desc">Randomly pick who goes first</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:var(--sp-3)">
+        <div class="t-label">Players</div>
+        <div class="fps-players" id="fps-tags">
+          <span style="font-size:13px;color:var(--text-muted)">No players yet</span>
+        </div>
+        <div class="fps-add-row">
+          <input type="text" class="form-input" id="fps-input" placeholder="Add player name…"
+            onkeydown="if(event.key==='Enter') fpsAddPlayer()" style="flex:1">
+          <button class="btn btn-ghost" onclick="fpsAddPlayer()" style="white-space:nowrap">+ Add</button>
+        </div>
+      </div>
+
+      <div id="fps-result" class="fps-result">
+        <span class="fps-winner-label" style="color:var(--text-muted)">Add players and spin!</span>
+      </div>
+
+      <button class="btn btn-amber w-full" id="fps-spin-btn" onclick="fpsPickFirst()">
+        🎲 Spin!
+      </button>
+    </div>
+
+    <!-- ======= TOOL 2: DICE ROLLER ======= -->
+    <div class="tool-card">
+      <div class="tool-header">
+        <div class="tool-icon tool-icon-cyan">🎯</div>
+        <div>
+          <div class="tool-title">Dice Roller</div>
+          <div class="tool-desc">Roll any dice combination</div>
+        </div>
+      </div>
+
+      <div class="dice-config">
+        <div class="t-label">Die type</div>
+        <div class="dice-type-row">
+          ${[4,6,8,10,12,20].map(s =>
+            `<button class="dice-btn ${s===6?'active':''}" data-sides="${s}" onclick="selectDie(${s})">d${s}</button>`
+          ).join('')}
+        </div>
+
+        <div class="t-label">Number of dice</div>
+        <div class="dice-count-row">
+          <button class="dice-count-btn" onclick="changeDiceCount(-1)">−</button>
+          <div class="dice-count-val" id="dice-count-val">2</div>
+          <button class="dice-count-btn" onclick="changeDiceCount(1)">+</button>
+        </div>
+      </div>
+
+      <div id="dice-results" class="dice-results">
+        <span style="font-size:13px;color:var(--text-muted)">Hit roll to throw the dice</span>
+      </div>
+      <div class="dice-total" id="dice-total"></div>
+
+      <button class="btn btn-primary w-full" onclick="rollDice()">
+        🎯 Roll dice
+      </button>
+    </div>
+
+    <!-- ======= TOOL 3: SCORE TRACKER (full width) ======= -->
+    <div class="tool-card score-tracker">
+      <div class="tool-header">
+        <div class="tool-icon tool-icon-purple">📊</div>
+        <div>
+          <div class="tool-title">Score Tracker</div>
+          <div class="tool-desc">Track scores across rounds — generic or use a game preset</div>
+        </div>
+      </div>
+
+      <div class="tracker-setup">
+        <div>
+          <div class="t-label" style="margin-bottom:var(--sp-2)">Quick start with a preset</div>
+          <div class="preset-row">
+            ${Object.keys(PRESETS).map(g =>
+              `<button class="preset-btn" onclick="loadPreset('${g}')">${g}</button>`
+            ).join('')}
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-4)">
+          <div>
+            <div class="t-label" style="margin-bottom:var(--sp-2)">Players (max 6)</div>
+            <div class="fps-add-row">
+              <input type="text" class="form-input" id="tracker-player-input" placeholder="Add player…"
+                onkeydown="if(event.key==='Enter') addTrackerPlayer()" style="flex:1">
+              <button class="btn btn-ghost" onclick="addTrackerPlayer()">+ Add</button>
+            </div>
+            <div class="tracker-players-row" id="tracker-player-tags" style="margin-top:var(--sp-3)"></div>
+          </div>
+          <div>
+            <div class="t-label" style="margin-bottom:var(--sp-2)">Rounds</div>
+            <div class="dice-count-row">
+              <button class="dice-count-btn" onclick="removeRound()">−</button>
+              <div class="dice-count-val" id="tracker-round-val">3</div>
+              <button class="dice-count-btn" onclick="addRound()">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="score-table-wrap">
+        <div style="padding:var(--sp-8);text-align:center;color:var(--text-muted);font-size:14px">
+          Add at least 2 players to start tracking.
+        </div>
+      </div>
+
+      <!-- Winner banner -->
+      <div class="winner-banner" id="winner-banner">
+        <div class="w-label">🏆 Winner!</div>
+        <div class="w-name" id="winner-name"></div>
+        <div class="w-score" id="winner-score"></div>
+      </div>
+
+      <div class="tracker-controls">
+        <button class="btn btn-primary" onclick="declareWinner()">🏆 Declare winner</button>
+        <button class="btn btn-ghost" onclick="resetTracker()">Reset</button>
+        <div class="round-counter">
+          Game: <span id="tracker-game-label">Custom</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+` + closeShell();
+
+// Keep round counter label in sync
+const origAddRound    = addRound;
+const origRemoveRound = removeRound;
+const origLoadPreset  = loadPreset;
+
+addRound = function() {
+  origAddRound();
+  document.getElementById('tracker-round-val').textContent  = trackerRounds;
+};
+removeRound = function() {
+  origRemoveRound();
+  document.getElementById('tracker-round-val').textContent  = trackerRounds;
+};
+loadPreset = function(game) {
+  origLoadPreset(game);
+  document.getElementById('tracker-round-val').textContent  = trackerRounds;
+  document.getElementById('tracker-game-label').textContent = trackerGame;
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  resetFpsResult();
+});
+</script>
+</body>
+</html>

@@ -18,31 +18,44 @@ const PHS = {
 
 // ---- Sidebar navigation ----
 function initSidebar() {
-  const path = window.location.pathname;
-  const links = document.querySelectorAll('.nav-item[data-page]');
-  links.forEach(link => {
-    const page = link.getAttribute('data-page');
-    if (path.includes(page)) link.classList.add('active');
-    link.addEventListener('click', () => {
-      window.location.href = link.getAttribute('href') || '#';
-    });
-  });
-
-  // Mobile hamburger
-  const hamburger = document.getElementById('hamburger');
-  const sidebar = document.querySelector('.sidebar');
-  if (hamburger && sidebar) {
-    hamburger.addEventListener('click', () => {
-      sidebar.classList.toggle('mobile-open');
-    });
-  }
-
   // Populate user in header
   const avatarEl = document.getElementById('header-avatar');
   const nameEl   = document.getElementById('header-name');
   if (avatarEl) avatarEl.textContent = PHS.currentUser.initials;
   if (nameEl)   nameEl.textContent   = PHS.currentUser.displayName;
 }
+
+// ---- Mobile sidebar toggle ----
+function toggleSidebar() {
+  const sidebar  = document.getElementById('sidebar');
+  const overlay  = document.getElementById('sidebar-overlay');
+  const hamburger = document.getElementById('hamburger');
+  if (!sidebar) return;
+  const isOpen = sidebar.classList.contains('mobile-open');
+  if (isOpen) {
+    closeSidebar();
+  } else {
+    sidebar.classList.add('mobile-open');
+    overlay && overlay.classList.add('visible');
+    hamburger && hamburger.classList.add('open');
+    document.body.style.overflow = 'hidden'; // prevent scroll behind overlay
+  }
+}
+
+function closeSidebar() {
+  const sidebar   = document.getElementById('sidebar');
+  const overlay   = document.getElementById('sidebar-overlay');
+  const hamburger = document.getElementById('hamburger');
+  sidebar && sidebar.classList.remove('mobile-open');
+  overlay && overlay.classList.remove('visible');
+  hamburger && hamburger.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Close sidebar on Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSidebar();
+});
 
 // ---- Logout ----
 function handleLogout() {
